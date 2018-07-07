@@ -527,6 +527,7 @@ public final class ViewRootImpl implements ViewParent,
         mIsPreFlingBoostEnabled = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableCpuBoostForPreFling);
         if (mIsPreFlingBoostEnabled) {
+            mPerf = new BoostFramework();
             mPreFlingBoostTimeOut = context.getResources().getInteger(
                     com.android.internal.R.integer.preflingboost_timeout_param);
             mPreFlingBoostParamVal = context.getResources().getIntArray(
@@ -2890,14 +2891,9 @@ public final class ViewRootImpl implements ViewParent,
         scrollToRectOrFocus(null, false);
 
         if (mAttachInfo.mViewScrollChanged) {
-            if (mIsPreFlingBoostEnabled && mHaveMoveEvent && !mIsPerfLockAcquired) {
+            if (mHaveMoveEvent && !mIsPerfLockAcquired && mPerf != null) {
                 mIsPerfLockAcquired = true;
-                if (mPerf == null) {
-                    mPerf = new BoostFramework();
-                }
-                if (mPerf != null) {
-                    mPerf.perfLockAcquire(mPreFlingBoostTimeOut, mPreFlingBoostParamVal);
-                }
+                mPerf.perfLockAcquire(mPreFlingBoostTimeOut, mPreFlingBoostParamVal);
             }
             mAttachInfo.mViewScrollChanged = false;
             mAttachInfo.mTreeObserver.dispatchOnScrollChanged();
